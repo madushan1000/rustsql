@@ -1,5 +1,5 @@
 [package]
-name = "rustdb"
+name = "rustsql"
 version = "0.1.0"
 authors = ["Madushan Nishantha <j.l.madushan@gmail.com>"]
 edition = "2018"

@@ -39,7 +39,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustdb"
+name = "rustsql"
 version = "0.1.0"
 dependencies = [
  "parameterized",
