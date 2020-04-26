@@ -20,7 +20,6 @@ const OR_KEYWORD: Keyword = "or";
 const TRUE_KEYWORD: Keyword = "true";
 const FALSE_KEYWORD: Keyword = "false";
 
-
 type Symbol = &'static str;
 
 const SEMICOLON_SYMBOL: Symbol = ";";
@@ -33,7 +32,7 @@ const NEQ_SYMBOL: Symbol = "<>";
 const CONCAT_SYMBOL: Symbol = "||";
 const PLUS_SYMBOL: Symbol = "+";
 
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 struct Location {
     line: usize,
     col: usize,
@@ -46,7 +45,7 @@ enum TokenKind {
     IdentifierKind,
     StringKind,
     NumericKind,
-    BooleanKind
+    BooleanKind,
 }
 
 #[derive(Debug)]
@@ -74,17 +73,14 @@ impl Cursor {
     fn new() -> Cursor {
         Cursor {
             pointer: 0,
-            loc: Location::new()
+            loc: Location::new(),
         }
     }
 }
 
 impl Location {
     fn new() -> Location {
-        Location {
-            line: 0,
-            col: 0
-        }
+        Location { line: 0, col: 0 }
     }
 }
 
@@ -95,7 +91,13 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
         loc: Location { line: 0, col: 0 },
     };
     'lex: while &cur.pointer < &source.len() {
-        let lexers: Vec<Lexer> = vec![lex_keyword, lex_symbol, lex_string, lex_numeric, lex_identifier,];
+        let lexers: Vec<Lexer> = vec![
+            lex_keyword,
+            lex_symbol,
+            lex_string,
+            lex_numeric,
+            lex_identifier,
+        ];
 
         for l in lexers {
             if let (token, new_cursor, true) = l(&source, cur.clone()) {
@@ -194,7 +196,11 @@ fn lex_numeric(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     )
 }
 
-fn lex_character_delimited(source: &str, ic: Cursor, delimiter: char) -> (Option<Token>, Cursor, bool) {
+fn lex_character_delimited(
+    source: &str,
+    ic: Cursor,
+    delimiter: char,
+) -> (Option<Token>, Cursor, bool) {
     let mut cur = ic.clone();
 
     if source[cur.pointer..].len() == 0 {
@@ -210,11 +216,12 @@ fn lex_character_delimited(source: &str, ic: Cursor, delimiter: char) -> (Option
     let mut value = String::new();
 
     while cur.pointer < source.len() {
-
         let c = source.chars().nth(cur.pointer).unwrap();
 
         if c == delimiter {
-            if cur.pointer + 1 >= source.len() || source.chars().nth(cur.pointer + 1).unwrap() != delimiter {
+            if cur.pointer + 1 >= source.len()
+                || source.chars().nth(cur.pointer + 1).unwrap() != delimiter
+            {
                 cur.pointer += 1;
                 cur.loc.col += 1;
                 return (
@@ -245,13 +252,19 @@ fn lex_string(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
 
 fn longest_match(source: &str, ic: Cursor, options: &Vec<&str>) -> String {
     let mut value = String::new();
-    let mut skip_list: Vec<usize> = vec!{};
+    let mut skip_list: Vec<usize> = vec![];
     let mut matched = String::new();
 
     let mut cur = ic.clone();
 
     while cur.pointer < source.len() {
-        value.push(source.chars().nth(cur.pointer).unwrap().to_ascii_lowercase());
+        value.push(
+            source
+                .chars()
+                .nth(cur.pointer)
+                .unwrap()
+                .to_ascii_lowercase(),
+        );
         cur.pointer += 1;
         'matched: for (index, option) in options.iter().enumerate() {
             for skip in &skip_list {
@@ -288,38 +301,49 @@ fn lex_symbol(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     cur.loc.col += 1;
     cur.pointer += 1;
 
-    let symbols = vec!{EQ_SYMBOL, NEQ_SYMBOL, CONCAT_SYMBOL, PLUS_SYMBOL, COMMA_SYMBOL, LEFTPAREN_SYMBOL, RIGHTPAREN_SYMBOL, SEMICOLON_SYMBOL, ASTERISK_SYMBOL};
-    
+    let symbols = vec![
+        EQ_SYMBOL,
+        NEQ_SYMBOL,
+        CONCAT_SYMBOL,
+        PLUS_SYMBOL,
+        COMMA_SYMBOL,
+        LEFTPAREN_SYMBOL,
+        RIGHTPAREN_SYMBOL,
+        SEMICOLON_SYMBOL,
+        ASTERISK_SYMBOL,
+    ];
+
     match c {
         '\n' => {
             cur.loc.line += 1;
             cur.loc.col = 0;
             (None, cur, true)
-        },
+        }
         '\t' => (None, cur, true),
         ' ' => (None, cur, true),
-        _ => {
-            match &longest_match(source, ic.clone(), &symbols)[..] {
-                "" => (None, ic, false),
-                matched => {
-                    cur.pointer = ic.pointer + matched.len();
-                    cur.loc.col = ic.loc.col + matched.len();
-                    (Some(Token{
+        _ => match &longest_match(source, ic.clone(), &symbols)[..] {
+            "" => (None, ic, false),
+            matched => {
+                cur.pointer = ic.pointer + matched.len();
+                cur.loc.col = ic.loc.col + matched.len();
+                (
+                    Some(Token {
                         value: matched.to_string(),
                         loc: ic.loc,
                         kind: TokenKind::SymbolKind,
-                    }), cur, true)
-                }
+                    }),
+                    cur,
+                    true,
+                )
             }
-        }
+        },
     }
-
 }
 
 fn lex_identifier(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
-    if let (token, new_cursor, true) = lex_character_delimited(source, ic.clone(), '"'){
+    if let (token, new_cursor, true) = lex_character_delimited(source, ic.clone(), '"') {
         return (token, new_cursor, true);
-    } 
+    }
     let mut cur = ic.clone();
     let mut c = source.chars().nth(cur.pointer).unwrap();
 
@@ -341,23 +365,44 @@ fn lex_identifier(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
             value.push(c);
             cur.loc.col += 1;
             cur.pointer += 1;
-            continue
+            continue;
         }
-        break
+        break;
     }
     if value.len() == 0 {
         return (None, ic, false);
     }
-    (Some(Token{
-        value: value.to_lowercase(),
-        loc: ic.loc,
-        kind: TokenKind::IdentifierKind,
-    }), cur, true)
+    (
+        Some(Token {
+            value: value.to_lowercase(),
+            loc: ic.loc,
+            kind: TokenKind::IdentifierKind,
+        }),
+        cur,
+        true,
+    )
 }
 
 fn lex_keyword(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     let mut cur = ic.clone();
-    let options = vec!{SELECT_KEYWORD, FROM_KEYWORD, AS_KEYWORD, TABLE_KEYWORD, CREATE_KEYWORD, INSERT_KEYWORD, INTO_KEYWORD, VALUES_KEYWORD, INT_KEYWORD, TEXT_KEYWORD, BOOL_KEYWORD, WHERE_KEYWORD, AND_KEYWORD, OR_KEYWORD, TRUE_KEYWORD, FALSE_KEYWORD};
+    let options = vec![
+        SELECT_KEYWORD,
+        FROM_KEYWORD,
+        AS_KEYWORD,
+        TABLE_KEYWORD,
+        CREATE_KEYWORD,
+        INSERT_KEYWORD,
+        INTO_KEYWORD,
+        VALUES_KEYWORD,
+        INT_KEYWORD,
+        TEXT_KEYWORD,
+        BOOL_KEYWORD,
+        WHERE_KEYWORD,
+        AND_KEYWORD,
+        OR_KEYWORD,
+        TRUE_KEYWORD,
+        FALSE_KEYWORD,
+    ];
 
     let matched = longest_match(source, ic.clone(), &options);
     let kind: TokenKind;
@@ -365,14 +410,18 @@ fn lex_keyword(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     match &matched[..] {
         "" => return (None, ic, false),
         TRUE_KEYWORD | FALSE_KEYWORD => kind = TokenKind::BooleanKind,
-        _ => kind = TokenKind::KeywordKind
+        _ => kind = TokenKind::KeywordKind,
     }
     cur.pointer = ic.pointer + matched.len();
     cur.loc.col = ic.loc.col + matched.len();
 
-    (Some(Token{
+    (
+        Some(Token {
             value: matched.to_string(),
             kind,
-            loc: ic.loc
-        }), cur, true)
+            loc: ic.loc,
+        }),
+        cur,
+        true,
+    )
 }

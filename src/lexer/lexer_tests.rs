@@ -1,5 +1,5 @@
-use parameterized::parameterized;
 use super::*;
+use parameterized::parameterized;
 
 #[parameterized(case = {
 	(true, "105"),
@@ -20,12 +20,12 @@ use super::*;
 	(false, " 1")
 })]
 fn numeric(case: (bool, &str)) {
-	let (is_number, value) = case;   
-	let (token, _, ok) = lex_numeric(value, Cursor::new());
-	assert_eq!(is_number, ok);
-	if ok {
-		assert_eq!(token.unwrap().value, value.trim());
-	}
+    let (is_number, value) = case;
+    let (token, _, ok) = lex_numeric(value, Cursor::new());
+    assert_eq!(is_number, ok);
+    if ok {
+        assert_eq!(token.unwrap().value, value.trim());
+    }
 }
 
 #[parameterized(case = {
@@ -39,15 +39,15 @@ fn numeric(case: (bool, &str)) {
 	(false, " 'foo'")
 })]
 fn string(case: (bool, &str)) {
-	let (is_string, mut value) = case; 
-	let (token, _, ok) = lex_string(value, Cursor::new());
-	assert_eq!(ok, is_string);
+    let (is_string, mut value) = case;
+    let (token, _, ok) = lex_string(value, Cursor::new());
+    assert_eq!(ok, is_string);
 
-	value = value.trim();
+    value = value.trim();
 
-	if ok {
-		assert_eq!(&value[1..value.len() - 1], token.unwrap().value);
-	}
+    if ok {
+        assert_eq!(&value[1..value.len() - 1], token.unwrap().value);
+    }
 }
 
 #[parameterized(case= {
@@ -55,14 +55,14 @@ fn string(case: (bool, &str)) {
 	(true, "||")
 })]
 fn symbol(case: (bool, &str)) {
-	let (is_symbol, mut value) = case; 
-	let (token, _, ok) = lex_symbol(value, Cursor::new());
-	assert_eq!(is_symbol, ok);
+    let (is_symbol, mut value) = case;
+    let (token, _, ok) = lex_symbol(value, Cursor::new());
+    assert_eq!(is_symbol, ok);
 
-	if ok {
-		value = value.trim();
-		assert_eq!(token.unwrap().value, value);
-	}
+    if ok {
+        value = value.trim();
+        assert_eq!(token.unwrap().value, value);
+    }
 }
 
 #[parameterized(case= {
@@ -79,15 +79,15 @@ fn symbol(case: (bool, &str)) {
 	(false," abc"," abc")
 })]
 fn identifier(case: (bool, &str, &str)) {
-	{
-		let (is_identifier, input, value) = case; 
+    {
+        let (is_identifier, input, value) = case;
 
-		let (token, _, ok) = lex_identifier(input, Cursor::new());
-		assert_eq!(is_identifier, ok);
-		if ok {
-			assert_eq!(value, token.unwrap().value);
-		}
-	}
+        let (token, _, ok) = lex_identifier(input, Cursor::new());
+        assert_eq!(is_identifier, ok);
+        if ok {
+            assert_eq!(value, token.unwrap().value);
+        }
+    }
 }
 
 #[parameterized(case= {
@@ -100,18 +100,15 @@ fn identifier(case: (bool, &str, &str)) {
 	(false,"flubbrety")
 })]
 fn keyword(case: (bool, &str)) {
-	let (is_keyword, mut value) = case;
+    let (is_keyword, mut value) = case;
 
-	let (token, _, ok) = lex_keyword(value, Cursor::new());
-	assert_eq!(is_keyword, ok);
-	if ok {
-		value = value.trim();
-		assert_eq!(value.to_lowercase(), token.unwrap().value);
-	}
+    let (token, _, ok) = lex_keyword(value, Cursor::new());
+    assert_eq!(is_keyword, ok);
+    if ok {
+        value = value.trim();
+        assert_eq!(value.to_lowercase(), token.unwrap().value);
+    }
 }
-
-
-
 
 #[parameterized(case={
 	("select a", 
@@ -171,10 +168,10 @@ fn keyword(case: (bool, &str)) {
 			Token{loc: Location{col: 20, line: 0},	value: ";".to_string(),				kind: TokenKind::SymbolKind},
 	}, None)
 })]
-fn lex(case:(&str, Vec<Token>, Option<String>)) {
-	let (input, input_tokens, _input_err) = case;
+fn lex(case: (&str, Vec<Token>, Option<String>)) {
+    let (input, input_tokens, _input_err) = case;
 
-	let tokens = lex(input).unwrap();
-	assert_eq!(tokens.len(), input_tokens.len());
-	assert_eq!(tokens, input_tokens);
+    let tokens = lex(input).unwrap();
+    assert_eq!(tokens.len(), input_tokens.len());
+    assert_eq!(tokens, input_tokens);
 }
