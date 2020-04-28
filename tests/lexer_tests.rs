@@ -1,4 +1,4 @@
-use super::*;
+use rustsql::lexer::*;
 use parameterized::parameterized;
 
 #[parameterized(case = {

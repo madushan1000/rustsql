@@ -1,45 +1,42 @@
-#[cfg(test)]
-mod lexer_tests;
-
 type Keyword = &'static str;
 
-const SELECT_KEYWORD: Keyword = "select";
-const FROM_KEYWORD: Keyword = "from";
-const AS_KEYWORD: Keyword = "as";
-const TABLE_KEYWORD: Keyword = "table";
-const CREATE_KEYWORD: Keyword = "create";
-const INSERT_KEYWORD: Keyword = "insert";
-const INTO_KEYWORD: Keyword = "into";
-const VALUES_KEYWORD: Keyword = "values";
-const INT_KEYWORD: Keyword = "int";
-const TEXT_KEYWORD: Keyword = "text";
-const BOOL_KEYWORD: Keyword = "boolean";
-const WHERE_KEYWORD: Keyword = "where";
-const AND_KEYWORD: Keyword = "and";
-const OR_KEYWORD: Keyword = "or";
-const TRUE_KEYWORD: Keyword = "true";
-const FALSE_KEYWORD: Keyword = "false";
-
+pub const SELECT_KEYWORD: Keyword = "select";
+pub const FROM_KEYWORD: Keyword = "from";
+pub const AS_KEYWORD: Keyword = "as";
+pub const TABLE_KEYWORD: Keyword = "table";
+pub const CREATE_KEYWORD: Keyword = "create";
+pub const INSERT_KEYWORD: Keyword = "insert";
+pub const INTO_KEYWORD: Keyword = "into";
+pub const VALUES_KEYWORD: Keyword = "values";
+pub const INT_KEYWORD: Keyword = "int";
+pub const TEXT_KEYWORD: Keyword = "text";
+pub const BOOL_KEYWORD: Keyword = "boolean";
+pub const WHERE_KEYWORD: Keyword = "where";
+pub const AND_KEYWORD: Keyword = "and";
+pub const OR_KEYWORD: Keyword = "or";
+pub const TRUE_KEYWORD: Keyword = "true";
+pub const FALSE_KEYWORD: Keyword = "false";
+ 
 type Symbol = &'static str;
 
-const SEMICOLON_SYMBOL: Symbol = ";";
-const ASTERISK_SYMBOL: Symbol = "*";
-const COMMA_SYMBOL: Symbol = ",";
-const LEFTPAREN_SYMBOL: Symbol = "(";
-const RIGHTPAREN_SYMBOL: Symbol = ")";
-const EQ_SYMBOL: Symbol = "=";
-const NEQ_SYMBOL: Symbol = "<>";
-const CONCAT_SYMBOL: Symbol = "||";
-const PLUS_SYMBOL: Symbol = "+";
+pub const SEMICOLON_SYMBOL: Symbol = ";";
+pub const ASTERISK_SYMBOL: Symbol = "*";
+pub const COMMA_SYMBOL: Symbol = ",";
+pub const LEFTPAREN_SYMBOL: Symbol = "(";
+pub const RIGHTPAREN_SYMBOL: Symbol = ")";
+pub const EQ_SYMBOL: Symbol = "=";
+pub const NEQ_SYMBOL: Symbol = "<>";
+pub const CONCAT_SYMBOL: Symbol = "||";
+pub const PLUS_SYMBOL: Symbol = "+";
 
 #[derive(Clone, Debug)]
-struct Location {
-    line: usize,
-    col: usize,
+pub struct Location {
+    pub line: usize,
+    pub col: usize,
 }
 
 #[derive(PartialEq, Debug)]
-enum TokenKind {
+pub enum TokenKind {
     KeywordKind,
     SymbolKind,
     IdentifierKind,
@@ -49,16 +46,16 @@ enum TokenKind {
 }
 
 #[derive(Debug)]
-struct Token {
-    value: String,
-    kind: TokenKind,
-    loc: Location,
+pub struct Token {
+    pub value: String,
+    pub kind: TokenKind,
+    pub loc: Location,
 }
 
 #[derive(Clone, Debug)]
-struct Cursor {
-    pointer: usize,
-    loc: Location,
+pub struct Cursor {
+    pub pointer: usize,
+    pub loc: Location,
 }
 
 type Lexer = fn(&str, Cursor) -> (Option<Token>, Cursor, bool);
@@ -70,7 +67,7 @@ impl PartialEq for Token {
 }
 
 impl Cursor {
-    fn new() -> Cursor {
+    pub fn new() -> Cursor {
         Cursor {
             pointer: 0,
             loc: Location::new(),
@@ -84,7 +81,7 @@ impl Location {
     }
 }
 
-fn lex(source: &str) -> Result<Vec<Token>, String> {
+pub fn lex(source: &str) -> Result<Vec<Token>, String> {
     let mut tokens: Vec<Token> = vec![];
     let mut cur = Cursor {
         pointer: 0,
@@ -122,7 +119,7 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
     Ok(tokens)
 }
 
-fn lex_numeric(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
+pub fn lex_numeric(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     let mut cur = ic.clone();
     let mut period_found = false;
     let mut exp_marker_found = false;
@@ -196,7 +193,7 @@ fn lex_numeric(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     )
 }
 
-fn lex_character_delimited(
+pub fn lex_character_delimited(
     source: &str,
     ic: Cursor,
     delimiter: char,
@@ -246,11 +243,11 @@ fn lex_character_delimited(
     (None, ic, false)
 }
 
-fn lex_string(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
+pub fn lex_string(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     lex_character_delimited(source, ic, '\'')
 }
 
-fn longest_match(source: &str, ic: Cursor, options: &Vec<&str>) -> String {
+pub fn longest_match(source: &str, ic: Cursor, options: &Vec<&str>) -> String {
     let mut value = String::new();
     let mut skip_list: Vec<usize> = vec![];
     let mut matched = String::new();
@@ -295,7 +292,7 @@ fn longest_match(source: &str, ic: Cursor, options: &Vec<&str>) -> String {
     return matched;
 }
 
-fn lex_symbol(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
+pub fn lex_symbol(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     let c = source.chars().nth(ic.pointer).unwrap();
     let mut cur = ic.clone();
     cur.loc.col += 1;
@@ -340,7 +337,7 @@ fn lex_symbol(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     }
 }
 
-fn lex_identifier(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
+pub fn lex_identifier(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     if let (token, new_cursor, true) = lex_character_delimited(source, ic.clone(), '"') {
         return (token, new_cursor, true);
     }
@@ -383,7 +380,7 @@ fn lex_identifier(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     )
 }
 
-fn lex_keyword(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
+pub fn lex_keyword(source: &str, ic: Cursor) -> (Option<Token>, Cursor, bool) {
     let mut cur = ic.clone();
     let options = vec![
         SELECT_KEYWORD,
