@@ -1,5 +1,5 @@
-use rustsql::lexer::*;
 use parameterized::parameterized;
+use rustsql::lexer::*;
 
 #[parameterized(case = {
 	(true, "105"),

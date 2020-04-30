@@ -1,4 +1,4 @@
-type Keyword = &'static str;
+pub type Keyword = &'static str;
 
 pub const SELECT_KEYWORD: Keyword = "select";
 pub const FROM_KEYWORD: Keyword = "from";
@@ -16,8 +16,8 @@ pub const AND_KEYWORD: Keyword = "and";
 pub const OR_KEYWORD: Keyword = "or";
 pub const TRUE_KEYWORD: Keyword = "true";
 pub const FALSE_KEYWORD: Keyword = "false";
- 
-type Symbol = &'static str;
+
+pub type Symbol = &'static str;
 
 pub const SEMICOLON_SYMBOL: Symbol = ";";
 pub const ASTERISK_SYMBOL: Symbol = "*";
@@ -35,7 +35,7 @@ pub struct Location {
     pub col: usize,
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum TokenKind {
     KeywordKind,
     SymbolKind,
@@ -45,7 +45,7 @@ pub enum TokenKind {
     BooleanKind,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Token {
     pub value: String,
     pub kind: TokenKind,
@@ -76,8 +76,18 @@ impl Cursor {
 }
 
 impl Location {
-    fn new() -> Location {
+    pub fn new() -> Location {
         Location { line: 0, col: 0 }
+    }
+}
+
+impl Token {
+    pub fn new() -> Token {
+        Token{
+            value: String::new(),
+            kind: TokenKind::BooleanKind,
+            loc: Location::new()
+        }
     }
 }
 
